@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>
+            Within Cycles
+        </title>
+        <style>
+            * {
+                background-color: #1a0b0b;
+                color: #bfc7c1;
+            }
+            body {
+                margin:0px;
+                display: flex;
+                flex-direction: row;
+                align-items: stretch;
+                gap: 0px 0px;
+                flex-wrap: nowrap;
+                height:100vh;
+                max-height: 100vh;
+                overflow: hidden;
+            }
+            #right_panel {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0px 0px;
+                flex-wrap: nowrap;
+                max-height: 100%;
+                overflow: hidden;
+            }
+            #bottom_section {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0px 0px;
+                flex-wrap: nowrap;
+                max-height: 100%;
+                overflow: hidden;
+            }
+            #story_panel  {
+                flex-grow: 1;
+                overflow: scroll;
+            }
+            #top_bar {
+                display: flex;
+                flex-direction: row;
+                align-items: stretch;
+                flex-wrap: nowrap;
+            }
+            #title {
+                flex-grow: 1;
+                text-align: center;
+                font-size: 40px;
+                padding-top: 10px;
+                font-family:monospace;
+            }
+            #menu_panel {
+                display: flex;
+                flex-direction: column;
+                background: url("right border.png"), repeating-linear-gradient(#bfc7c155,#bfc7c155 1px,#1a0b0b 1px, #1a0b0b 12px);
+                background-size: 100% 100%, auto;
+                padding-right: 10px;
+                visibility: collapse;
+            }
+            #menu {
+                flex-grow: 1;
+                background: transparent;
+            }
+            #action_panel {
+                border-top-right-radius: 10px;
+                border-width: 8px;
+                border-color: #bfc7c1;
+                border-top-style: solid;
+                border-right-style: solid;
+                background-image: linear-gradient(#1a0b0b 0%,#2a1b1b 100%);
+            }
+            #no_action {
+                padding: 10px;
+                font-style: italic;
+                cursor:none;
+                background: inherit;
+            }
+            .menu_button {
+                cursor: pointer;
+                background-image: url('menu.png');
+                image-rendering: pixelated;
+                background-color: transparent;
+                background-repeat: no-repeat;
+                background-size: cover;
+                height: 55px;
+                width: 55px;
+            }
+        </style>
+        <script>
+            var StoryPanel;
+            var ActionPanel;
+
+            var StoryPages={}; // Keeps track of what's happened.
+            var Actions={};    // Keeps track of what options are available.
+
+            function ShowMenu() {
+                document.getElementById('menu_panel').style.setProperty('visibility','visible');
+                document.getElementById('open_menu').style.setProperty('visibility','collapse');
+            }
+
+            function HideMenu() {
+                document.getElementById('menu_panel').style.setProperty('visibility','collapse');
+                document.getElementById('open_menu').style.setProperty('visibility','visible');
+            }
+
+            function HomePage() {
+                UpdateStory();
+                UpdateActions();
+                var BottomSection=document.createElement('div').append(StoryPanel,ActionPanel);
+                BottomSection.id='bottom_section';
+                UpdatePageTemplate("Within Cycles",BottomSection);
+            }
+
+            function UpdateActions() {
+                if (Object.keys(Actions).length==0) {
+                    ActionPanel=document.createElement('div');
+                    ActionPanel.innerHTML='There is nothing you can do.';
+                    ActionPanel.id='no_action';
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div id="menu_panel">
+            <div id="menu">
+                <!-- Menu options go here. -->
+            </div>
+            <div id="close_menu" class="menu_button" onclick="HideMenu()">
+            </div>
+        </div>
+        <div id="right_panel">
+            <div id="top_bar">
+                <div id="open_menu" class="menu_button" onclick="ShowMenu()">
+                </div>
+                <div id="title">
+                    Within Cycles
+                </div>
+            </div>
+            <div id="bottom_section">
+                <div id="story_panel">
+                    <!-- Story stuff goes here. -->
+                </div>
+                <div id="action_panel">
+                    <!-- Actions go here. -->
+                    <div id="no_action">
+                        There is nothing you can do.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
