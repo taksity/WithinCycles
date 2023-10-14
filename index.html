@@ -11,15 +11,24 @@
                 color: #bfc7c1;
             }
             body {
-                margin:0px;
+                height:100vh;
                 display: flex;
-                flex-direction: row;
+                margin:0px;
                 align-items: stretch;
                 gap: 0px 0px;
-                flex-wrap: nowrap;
-                height:100vh;
                 max-height: 100vh;
                 overflow: hidden;
+                flex-wrap: nowrap;
+            }
+            .home_page {
+                flex-direction: row;
+            }
+            .splash_page {
+                flex-direction: column;
+            }
+            #splash_button {
+                cursor: pointer;
+                font-family:monospace;
             }
             #right_panel {
                 flex-grow: 1;
@@ -57,6 +66,21 @@
                 font-size: 40px;
                 padding-top: 10px;
                 font-family:monospace;
+            }
+            #title_top {
+                align-self: flex-end;
+                font-size: 48px;
+                font-family:monospace;
+            }
+            .titling {
+                text-align: center;
+                width: 100%;
+            }
+            .title_box {
+                flex: 1 0 auto;
+                display: flex;
+                align-content: center;
+                width: 100%;
             }
             #menu_panel {
                 display: flex;
@@ -96,12 +120,6 @@
             }
         </style>
         <script>
-            var StoryPanel;
-            var ActionPanel;
-
-            var StoryPages={}; // Keeps track of what's happened.
-            var Actions={};    // Keeps track of what options are available.
-
             function ShowMenu() {
                 document.getElementById('menu_panel').style.setProperty('visibility','visible');
                 document.getElementById('open_menu').style.setProperty('visibility','collapse');
@@ -113,49 +131,64 @@
             }
 
             function HomePage() {
-                UpdateStory();
-                UpdateActions();
-                var BottomSection=document.createElement('div').append(StoryPanel,ActionPanel);
-                BottomSection.id='bottom_section';
-                UpdatePageTemplate("Within Cycles",BottomSection);
+                var Elements=[];
+                var Pair=['HideMenu()','ShowMenu()'];
+                var IDBundle=[
+                    'menu',      'close_menu',      'open_menu',        'title',    'story_panel',
+                    'no_action', 'action_panel',    'bottom_section',   'top_bar',  'right_panel',
+                    'menu_panel'];
+                var Triplets=[[7,4,6],[8,2,3],[9,8,7],[10,0,1]];
+                for(var i=0;i<11;i++) {
+                    Elements.push(document.createElement('div'));
+                    Elements[i].id=IDBundle[i];
+                }
+                for(var i=1;i<3;i++) {
+                    Elements[i].setAttribute('class','menu_button');
+                    Elements[i].setAttribute('onclick',Pair[i-1]);
+                }
+                Elements[ 3].innerHTML='Within Cycles';
+                Elements[ 5].innerHTML='There is nothing you can do.';
+                Elements[ 6].append(Elements[5]);
+                for(var i=0;i<4;i++) {
+                    Elements[Triplets[i][0]].append(Elements[Triplets[i][1]],Elements[Triplets[i][2]]);
+                }
+                document.body.innerHTML='';
+                document.body.setAttribute('class','home_page');
+                document.body.append(Elements[10],Elements[9]);
             }
 
-            function UpdateActions() {
-                if (Object.keys(Actions).length==0) {
-                    ActionPanel=document.createElement('div');
-                    ActionPanel.innerHTML='There is nothing you can do.';
-                    ActionPanel.id='no_action';
-                }
+            function SplashPage() {
+                document.body.innerHTML='';
+                document.body.setAttribute('class','splash_page');
+                var a=document.createElement('div');
+                var b=document.createElement('div');
+                var c=document.createElement('span');
+                var d=document.createElement('span');
+                d.id='title_top';
+                d.setAttribute('class','titling');
+                c.id='splash_button';
+                c.setAttribute('class','titling');
+                c.setAttribute('onclick','HomePage()');
+                c.innerHTML='Start';
+                d.innerHTML='Within Cycles';
+                a.setAttribute('class','title_box');
+                a.append(d);
+                b.setAttribute('class','title_box');
+                b.append(c);
+                document.body.append(a,b);
             }
         </script>
     </head>
-    <body>
-        <div id="menu_panel">
-            <div id="menu">
-                <!-- Menu options go here. -->
-            </div>
-            <div id="close_menu" class="menu_button" onclick="HideMenu()">
-            </div>
+    <body class="splash_page">
+        <div class="title_box">
+            <span id="title_top" class="titling">
+                Within Cycles
+            </span>
         </div>
-        <div id="right_panel">
-            <div id="top_bar">
-                <div id="open_menu" class="menu_button" onclick="ShowMenu()">
-                </div>
-                <div id="title">
-                    Within Cycles
-                </div>
-            </div>
-            <div id="bottom_section">
-                <div id="story_panel">
-                    <!-- Story stuff goes here. -->
-                </div>
-                <div id="action_panel">
-                    <!-- Actions go here. -->
-                    <div id="no_action">
-                        There is nothing you can do.
-                    </div>
-                </div>
-            </div>
+        <div class="title_box">
+            <span id="splash_button" class="titling" onclick="HomePage()">
+                Start
+            </span>
         </div>
     </body>
 </html>
