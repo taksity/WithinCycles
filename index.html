@@ -189,7 +189,7 @@
                 align-self:flex-end;
 
                 font-size: 72px;
-                font-family: cursive;
+                font-family: cursive, fantasy, 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
             }
 
             .menu_panel {
@@ -273,6 +273,32 @@
             }
 
             .splash_button {
+                flex-grow: 0;
+            }
+
+            .notice_bin {
+                padding: 30px;
+            }
+
+            .notice_choice {
+                display: flex;
+                align-items: stretch;
+            }
+
+            .notice_button {
+                flex-grow: 0;
+                cursor: pointer;
+            }
+
+            .notice_spacer {
+                flex-grow: 1;
+            }
+
+            .notice_right {
+                text-align: right;
+            }
+
+            .the_splash_button {
                 cursor: pointer;
             }
         </style>
@@ -285,9 +311,11 @@
                 </span>
             </div>
             <div class="horizontal_half">
-                <span class="splash_button splash_text" onclick="InitializeMainPage()">
-                    Begin Game
-                </span>
+                <div class="splash_button splash_text">
+                    <span class="the_splash_button" onclick="InjectTemplate('notice')">
+                        Begin Game
+                    </span>
+                </div>
             </div>
         </template>
 
@@ -315,6 +343,37 @@
             <div class="story_contents">
             </div>
             <div class="action_panel">
+            </div>
+        </template>
+
+        <!-- If we don't detect any save information then the splash page will redirect to a notice page to give the player an idea of what they're in for. -->
+        <template id="notice">
+            <div class="notice_bin">
+            <div>
+                <h2>Notice</h2>
+                <p>
+                    It appears that this is your first time playing this game. If you are unfamiliar with what you are getting into, be aware of the following:
+                </p>
+                <ul>
+                    <li>
+                        This is an interactive horror story containing text descriptions that readers may find disturbing, shocking, reprehensible, or otherwise repulsive. Therefore, the following categories of individuals are advised against engaging with the material: victims of trauma or abuse, individuals under the age of 18, individuals coping with one or more mental conditions, and individuals in an unsafe environment. Viewer discretion is advised.
+                    </li>
+                    <li>
+                        In addition to the horrific nature of the text; the author has deliberately designed an interface that will be uncooperative or even antagonistic at times in order to terrify their audience.
+                    </li>
+                    <li>
+                        The nature of all of your interactions with this game will be through text; however, the functionality of this webpage is provided by somewhat modern markup and programming interfaces and an unwieldy amount of data that may behave unexpectedly on devices of a particular age or hardware capacity or software constraint.
+                    </li>
+                    <li>
+                        Though the every element of this project may indicate otherwise; no malice is intended by the author (who is grateful for your time and feedback, and understanding if you can spare neither).
+                    </li>
+                </ul>
+            </div>
+            <div class="notice_choice">
+                <span class="notice_button" onclick="InitializeMainPage()">Continue</span>
+                <span class="notice_spacer"></span>
+                <span class="notice_button notice_right" onclick="GenerateSplashPage()">Escape</span>
+            </div>
             </div>
         </template>
 
