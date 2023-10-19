@@ -1,194 +1,335 @@
 <!DOCTYPE html>
 
+<!--
+    Notes to self:
+
+    The utlimate goals of this project are as follows: devise an application and get feedback to measure the quality of immersion resulting from an implementation of the G.E.S.P.O.R.T. system, devise a system whose visual and audio components accentuate the quality of the horror evoked from an interactive text interface while being as minimial as possible, and create an implementation of a game whose structure is modular enough in nature to be iterated or translated or otherwise improved on.
+
+    The goal of this application is to be as self-contained as possible. In order to achieve this effect everything necessary to run the game will be contained within this file. The only other file that we'll want is some JSON formatted data to create a sense of state and permanence so that the player doesn't lose their progress when they close the browser. For the sake of convenience, we'll also provide a mechanism for importing and exporting data.
+
+    Since everything is in a single file, rather than utilizing redirects everything must be rendered from this file. In order to minimize performance penalties while having a webpage with dynamic displays we'll utilize templates to store the rough shape of contents to be loaded in, and then utilize javascript variables to track the contents that need to be loaded in based on the template currently in use.
+-->
+
 <html>
     <head>
-        <title>
-            Within Cycles
-        </title>
+        <title>Within Cycles</title>
+
+        <script>
+            function RGBtoHex(sample) {
+                var nums = sample.match(/.*[rR][gG][bB]\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\).*/);
+                nums = nums.slice(1).map(Number).map(function f(a){return((a.toString(16)).padStart(2,'0'));});
+                return('#'+(nums.join('')));
+            }
+
+            function InjectTemplate(identification) {
+                document.body.innerHTML='';
+                document.body.attributes=[];
+
+                var Template = document.getElementById(identification).content.children;
+
+                for (var i=0;i<Template.length;i++) {
+                    document.body.append(Template[i].cloneNode(true));
+                }
+            }
+
+            function GenerateSplashPage() {
+                document.body.attributes=[];
+                document.body.setAttribute('class','tall_window');
+                document.body.innerHTML='';
+                InjectTemplate('splash_page');
+            }
+
+            function GenerateMainPage() {
+                document.body.attributes=[];
+                document.body.setAttribute('class','row_window');
+                InjectTemplate('main_page');
+
+                DrawButtons();
+
+                DrawBorder();
+            }
+
+            function ToggleMenu() {
+                var MenuPanel = document.getElementsByClassName('menu_panel')[0];
+                var TopButton = document.getElementsByClassName('top_button')[0];
+
+                if (!((MenuPanel==undefined)||(TopButton==undefined))) {
+                    var MenuPanelVis = getComputedStyle(MenuPanel).visibility;
+                    var TopButtonVis = getComputedStyle(TopButton).visibility;
+
+                    MenuPanel.style.setProperty('visibility',(MenuPanelVis=='visible')?'collapse':'visible');
+                    TopButton.style.setProperty('visibility',(MenuPanelVis=='collapse')?'collapse':'visible');
+                }
+            }
+
+            function DrawButtons() {
+                var buttons = document.getElementsByClassName('menu_button');
+                var color = RGBtoHex(getComputedStyle(document.body).color);
+
+                for(var i=0;i<buttons.length;i++) {
+                    var c1 = buttons[i].getContext('2d');
+
+                    c1.lineWidth = 6;
+                    c1.strokeStyle = color;
+
+                    c1.strokeRect(5,5,46,46);
+
+                    c1.beginPath();
+                    c1.moveTo(13.5,16);
+                    c1.lineTo(42.5,16);
+                    c1.moveTo(13.5,27.5);
+                    c1.lineTo(42.5,27.5);
+                    c1.moveTo(13.5,39);
+                    c1.lineTo(42.5,39);
+                    c1.stroke();
+                }
+            }
+
+            function DrawBorder() {
+                var Border = document.createElement('canvas');
+                Border.width='32';
+                Border.height='32';
+
+                var color = RGBtoHex(getComputedStyle(document.body).color);
+
+                var c = Border.getContext('2d');
+                c.strokeStyle=color;
+                c.fillStyle=color;
+                
+                var CoordSet = [
+                    [31,0,1,31], [24,0,6,1], [24,31,7,1],
+                    [30,2,1,5], [29,26,2,3], [30,9,1,3],
+                    [30,17,1,3], [27,1,3,1], [26,30,3,1],
+                    [0,0,32,1], [19,1,2,2]];
+                
+                var Coord = [
+                    [24,1],[28,2],[29,3],[26,4],[29,6],
+                    [26,8],[24,10],[29,10],[30,13],[27,14],
+                    [29,14],[30,15],[29,19],[26,21],[30,21],
+                    [28,23],[25,24],[30,24],[24,27],[25,28],
+                    [28,28],[27,29],[29,29],[24,30],[30,30],
+                    [12,1],[14,1],[18,1],[21,1],[23,1],
+                    [13,2],[15,3],[20,3],[23,4],[13,5],
+                    [20,5],[17,7],[10,3]
+                ]
+
+                for(var i=0;i<CoordSet.length;i++) {
+                    var j=CoordSet[i];
+                    c.fillRect(j[0],j[1],j[2],j[3]);
+                }
+
+                for(var i=0;i<Coord.length;i++) {
+                    var j=Coord[i];
+                    c.fillRect(j[0],j[1],1,1);
+                }
+
+                var image = new Image(32,32);
+                image.id = 'pic';
+                image.src = Border.toDataURL();
+                var Men = document.getElementsByClassName('menu_panel')[0].style;
+                Men.setProperty('border-image-source','url('+image.src+')');
+            }
+
+            function InjectTemplateToGenericPanel(SubPage,PageTitle) {
+                document.getElementsByClassName('page_title')[0].innerHTML=PageTitle;
+                var GenPan = document.getElementsByClassName('generic_panel')[0];
+                GenPan.children=[];
+
+                var Template = document.getElementById(SubPage).content.children;
+
+                for (var i=0;i<Template.length;i++) {
+                    GenPan.append(Template[i].cloneNode(true));
+                }
+            }
+
+            function InitializeMainPage() {
+                GenerateMainPage();
+                InjectTemplateToGenericPanel('story_panel','Within Cycles');
+            }
+        </script>
+
         <style>
-            * {
-                background-color: #1a0b0b;
-                color: #bfc7c1;
-            }
             body {
-                height:100vh;
-                display: flex;
-                margin:0px;
-                align-items: stretch;
-                gap: 0px 0px;
-                max-height: 100vh;
-                overflow: hidden;
-                flex-wrap: nowrap;
+                margin: 0px;
+                height: 100vh;
+                width:  100vw;
+
+                background-color: #140606;
+                color: #cfddd4;
+                font-family: 'Courier New',Monospace, Helvetica, Verdana;
             }
-            .home_page {
+
+            .tall_window {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .row_window {
+                display: flex;
                 flex-direction: row;
+
+                align-items: stretch;
+                flex-wrap: nowrap;
+                gap: 0px 0px;
+                overflow: hidden;
             }
-            .splash_page {
+
+            .horizontal_half {
+                display:flex;
+                flex-grow: 1;
+            }
+
+            .splash_text {
+                width: 100%;
+
+                text-align:center;
+            }
+
+            .splash_title {
+                align-self:flex-end;
+
+                font-size: 72px;
+                font-family: cursive;
+            }
+
+            .menu_panel {
+                padding-right: 20px;
+                height: calc( 100% - 8 );
+
+                align-items: stretch;
+
+                visibility: collapse;
+
+                border-right-style: solid;
+                border-top-style: solid;
+                border-width: 100;
+                border-image-repeat: round;
+                border-image-slice: 8;
+                border-image-width: 8;
+            }
+
+            .right_panel {
+                display: flex;
+                flex-grow: 1;
                 flex-direction: column;
+                gap: 0px 0px;
+                overflow: hidden;
+                align-items: stretch;
+                flex-wrap: nowrap;
+
+                max-height: 100%;
             }
-            #splash_button {
+
+            .title_panel {
+                flex-grow: 1;
+                flex-shrink: 0;
+            }
+
+            .bottom_button {
+                align-self: flex-end;
+            }
+
+            .menu_options {
+                flex-grow: 1;
+                flex-basis: auto;
+            }
+
+            .page_title {
+                flex-grow: 1;
+                text-align: center;
+
+                font-size: 48px;
+                font-family: 'Times New Roman' ,Helvetica, Verdana, Geneva, Tahoma, sans-serif;
+            }
+
+            .top_button {
+                visibility: visible;
+            }
+
+            .menu_button {
                 cursor: pointer;
-                font-family:monospace;
             }
-            #right_panel {
-                flex-grow: 1;
+
+            .button_container {
+                max-width: 54px;
+                max-height: 54px;
+            }
+
+            .generic_panel {
                 display: flex;
                 flex-direction: column;
-                align-items: stretch;
                 gap: 0px 0px;
-                flex-wrap: nowrap;
-                max-height: 100%;
                 overflow: hidden;
-            }
-            #bottom_section {
+                align-items: stretch;
+                flex-wrap: nowrap;
+
                 flex-grow: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0px 0px;
-                flex-wrap: nowrap;
                 max-height: 100%;
-                overflow: hidden;
             }
-            #story_panel  {
+
+            .story_contents {
                 flex-grow: 1;
                 overflow: scroll;
             }
-            #top_bar {
-                display: flex;
-                flex-direction: row;
-                align-items: stretch;
-                flex-wrap: nowrap;
-            }
-            #title {
-                flex-grow: 1;
-                text-align: center;
-                font-size: 40px;
-                padding-top: 10px;
-                font-family:monospace;
-            }
-            #title_top {
-                align-self: flex-end;
-                font-size: 48px;
-                font-family:monospace;
-            }
-            .titling {
-                text-align: center;
-                width: 100%;
-            }
-            .title_box {
-                flex: 1 0 auto;
-                display: flex;
-                align-content: center;
-                width: 100%;
-            }
-            #menu_panel {
-                display: flex;
-                flex-direction: column;
-                background: url("right border.png"), repeating-linear-gradient(#bfc7c155,#bfc7c155 1px,#1a0b0b 1px, #1a0b0b 12px);
-                background-size: 100% 100%, auto;
-                padding-right: 10px;
-                visibility: collapse;
-            }
-            #menu {
-                flex-grow: 1;
-                background: transparent;
-            }
-            #action_panel {
-                border-top-right-radius: 10px;
-                border-width: 8px;
-                border-color: #bfc7c1;
-                border-top-style: solid;
-                border-right-style: solid;
-                background-image: linear-gradient(#1a0b0b 0%,#2a1b1b 100%);
-            }
-            #no_action {
-                padding: 10px;
-                font-style: italic;
-                cursor:none;
-                background: inherit;
-            }
-            .menu_button {
+
+            .splash_button {
                 cursor: pointer;
-                background-image: url('menu.png');
-                image-rendering: pixelated;
-                background-color: transparent;
-                background-repeat: no-repeat;
-                background-size: cover;
-                height: 55px;
-                width: 55px;
             }
         </style>
-        <script>
-            function ShowMenu() {
-                document.getElementById('menu_panel').style.setProperty('visibility','visible');
-                document.getElementById('open_menu').style.setProperty('visibility','collapse');
-            }
 
-            function HideMenu() {
-                document.getElementById('menu_panel').style.setProperty('visibility','collapse');
-                document.getElementById('open_menu').style.setProperty('visibility','visible');
-            }
+        <!-- I'm going to use a splash screen to try and mask any performance issues related to loading the website into memory, and possibly give the game a somewhat polished look. -->
+        <template id="splash_page">
+            <div class="horizontal_half">
+                <span class="splash_title splash_text">
+                    Within Cycles
+                </span>
+            </div>
+            <div class="horizontal_half">
+                <span class="splash_button splash_text" onclick="InitializeMainPage()">
+                    Begin Game
+                </span>
+            </div>
+        </template>
 
-            function HomePage() {
-                var Elements=[];
-                var Pair=['HideMenu()','ShowMenu()'];
-                var IDBundle=[
-                    'menu',      'close_menu',      'open_menu',        'title',    'story_panel',
-                    'no_action', 'action_panel',    'bottom_section',   'top_bar',  'right_panel',
-                    'menu_panel'];
-                var Triplets=[[7,4,6],[8,2,3],[9,8,7],[10,0,1]];
-                for(var i=0;i<11;i++) {
-                    Elements.push(document.createElement('div'));
-                    Elements[i].id=IDBundle[i];
-                }
-                for(var i=1;i<3;i++) {
-                    Elements[i].setAttribute('class','menu_button');
-                    Elements[i].setAttribute('onclick',Pair[i-1]);
-                }
-                Elements[ 3].innerHTML='Within Cycles';
-                Elements[ 5].innerHTML='There is nothing you can do.';
-                Elements[ 6].append(Elements[5]);
-                for(var i=0;i<4;i++) {
-                    Elements[Triplets[i][0]].append(Elements[Triplets[i][1]],Elements[Triplets[i][2]]);
-                }
-                document.body.innerHTML='';
-                document.body.setAttribute('class','home_page');
-                document.body.append(Elements[10],Elements[9]);
-            }
+        <!-- The main page is a 'super template' with a 'menu panel', 'top panel', and 'bottom section'. The title within the top panel is subject to change, along with the contents of the right_panel. Everything else will be static. -->
+        <template id="main_page">
+            <div class="menu_panel tall_window">
+                <div class="menu_options"></div>
+                <canvas class="menu_button bottom_button" onclick="ToggleMenu()" width="54px" height="54px">
+                </canvas>
+            </div>
+            <div class="right_panel">
+                <div class="title_panel row_window">
+                    <div class="button_container">
+                        <canvas class="menu_button top_button" onclick="ToggleMenu()" width="54px" height="54px">
+                        </canvas>
+                    </div>
+                    <div class="page_title"></div>
+                </div>
+                <div class="generic_panel"></div>
+            </div>
+        </template>
 
-            function SplashPage() {
-                document.body.innerHTML='';
-                document.body.setAttribute('class','splash_page');
-                var a=document.createElement('div');
-                var b=document.createElement('div');
-                var c=document.createElement('span');
-                var d=document.createElement('span');
-                d.id='title_top';
-                d.setAttribute('class','titling');
-                c.id='splash_button';
-                c.setAttribute('class','titling');
-                c.setAttribute('onclick','HomePage()');
-                c.innerHTML='Start';
-                d.innerHTML='Within Cycles';
-                a.setAttribute('class','title_box');
-                a.append(d);
-                b.setAttribute('class','title_box');
-                b.append(c);
-                document.body.append(a,b);
-            }
-        </script>
+        <!-- The story panel will consist of a panel for listing whatever actions are available to the player at any given moment while the rest of the panel will be the text panel tracking the story so far. -->
+        <template id="story_panel">
+            <div class="story_contents">
+            </div>
+            <div class="action_panel">
+            </div>
+        </template>
+
+        <!-- The save panel will consist of a list of existing saves along with options to do load or overwrite or delete each save. Above the list is an option to create a new save with any desired name, an option to delete all existing saves, an option to import a JSON file of save-state information, an option to export all existing save-states to an external JSON file, and an option to reset the unlisted auto-save generated by the active state of the game. -->
+
+        <!-- The display panel gives the player options to tweak the appearance of the game including: the color pallette, font style and size, text decorations that distinguish different kinds of communication with the player, along -->
+
+        <!-- The audio panel gives the player options to tweak how loud the music and sound effects are, along with the ability to filter what song tracks they want. The audio will rely on the audio API to generate sounds on demand. -->
+
+        <!-- The info panel gives the player an in depth explanation of how the interface works and where they can find things, and gives a general rundown of how the story is structured. -->
+
+        <!-- The help panel gives the player a guide for how to report different kinds of errors or bugs experienced while running the game. It also offers to expidite the process by automating the collection of the information that would be most helpful. -->
     </head>
-    <body class="splash_page">
-        <div class="title_box">
-            <span id="title_top" class="titling">
-                Within Cycles
-            </span>
-        </div>
-        <div class="title_box">
-            <span id="splash_button" class="titling" onclick="HomePage()">
-                Start
-            </span>
-        </div>
+
+    <body onload="GenerateSplashPage()">
+        <!-- Nothing here yet. -->
     </body>
 </html>
