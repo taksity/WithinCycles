@@ -15,6 +15,17 @@
         <title>Within Cycles</title>
 
         <script>
+            function SafeParse(Text) {
+                try {
+                    var a=JSON.parse(Text);
+
+                    return(a);
+                }
+                catch {
+                    return(Text);
+                }
+            }
+
             function RGBtoHex(sample) {
                 var nums = sample.match(/.*[rR][gG][bB]\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\).*/);
                 nums = nums.slice(1).map(Number).map(function f(a){return((a.toString(16)).padStart(2,'0'));});
@@ -23,7 +34,7 @@
 
             function InjectTemplate(identification) {
                 document.body.innerHTML='';
-                document.body.attributes=[];
+                document.body.removeAttribute('style');
 
                 var Template = document.getElementById(identification).content.children;
 
@@ -199,6 +210,64 @@
                     }
                 }
             }
+
+            /*
+                For the sake of my sanity I'm going to leverage the accomodating nature of the localstorage API in order to store save file data as an object.
+
+                The structure of a save file is as follows:
+                
+                {
+                    category: 'save' ,  -- This distinguishes save files from any other objects we decide to store.
+                    profile: 'name' ,   -- This is where we store names assigned by players.
+                    indice: 0,          -- Each save is assigned a unique number.
+                                           This distinguishes unnamed save files from each other,
+                                           and also distinguishes save files with duplicate names.
+                    saveData: {}        -- The save data is stored in an object. Very nest; such layer.
+                }
+
+                For the sake of my sanity 0 is reserved for the auto-save, while other saves get the first available indice.
+
+                ALSO FOR THE SAKE OF MY SANITY: since objects have to be stringified to be stored I'm going to stringify all contents before entering into storage.
+            */
+           function GetSaves() {
+               var Data = Array.from(Object.values(window.localStorage));
+               Data = Data.map((a) => SafeParse(a));
+               Data = Data.filter((a) => (typeof(a)=='object'));
+               Data = Data.filter((a) => ((Array.from(Object.keys(a))).indexOf('category')>-1));
+               Data = Data.filter((a) => (a.category=='save'));
+               Data = Data.filter((a) => ((Array.from(Object.keys(a))).indexOf('indice')>-1));
+               Data = Data.filter((a) => Number.isSafeInteger(a.indice));
+               Data = Data.filter((a) => (a.indice>-1));
+               Data = Data.filter((a) => ((Array.from(Object.keys(a))).indexOf('saveData')>-1));
+               Data = Data.filter((a) => (typeof(a.saveData)=="object"));
+               Data = Data.filter((a) => !(Array.isArray(a.saveData)));
+
+               return(Data);
+           }
+
+           // In order to decide if the player needs the notice we check to see if they've already 'seen' it.
+           function CheckForFirstTime() {
+               return((window.localStorage.getItem('PlayFlag'))!=null);
+           }
+
+           // Once the player has clicked 'continue' we assume that they don't want to see it any more.
+           function FlagNoticeSeen() {
+               window.localStorage.setItem('PlayFlag',JSON.stringify(true));
+           }
+
+           function ConditionalNotice() {
+               if (CheckForFirstTime()) {
+                   InitializeMainPage();
+               }
+               else {
+                   InjectTemplate('notice');
+               }
+           }
+
+           function ConditionalMain() {
+               FlagNoticeSeen();
+               InitializeMainPage();
+           }
         </script>
 
         <style>
@@ -386,7 +455,7 @@
             </div>
             <div class="horizontal_half">
                 <div class="splash_button splash_text">
-                    <span class="the_splash_button" onclick="InjectTemplate('notice')">
+                    <span class="the_splash_button" onclick="ConditionalNotice()">
                         Begin Game
                     </span>
                 </div>
@@ -414,6 +483,9 @@
                     </div>
                     <div class="menu_panel_button" onclick="InjectTemplateToGenericPanel('help_panel','Help')">
                         Help Panel
+                    </div>
+                    <div class="menu_panel_button" onclick="InjectTemplate('notice')">
+                        Notice
                     </div>
                 </div>
                 <canvas class="menu_button bottom_button" onclick="ToggleMenu()" width="54px" height="54px">
@@ -463,7 +535,7 @@
                     </ul>
                 </div>
                 <div class="notice_choice">
-                    <span class="notice_button" onclick="InitializeMainPage()">Continue</span>
+                    <span class="notice_button" onclick="ConditionalMain()">Continue</span>
                     <span class="notice_spacer"></span>
                     <span class="notice_button notice_right" onclick="GenerateSplashPage()">Escape</span>
                 </div>
