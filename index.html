@@ -133,18 +133,71 @@
             function InjectTemplateToGenericPanel(SubPage,PageTitle) {
                 document.getElementsByClassName('page_title')[0].innerHTML=PageTitle;
                 var GenPan = document.getElementsByClassName('generic_panel')[0];
-                GenPan.children=[];
+                GenPan.innerHTML='';
 
                 var Template = document.getElementById(SubPage).content.children;
 
                 for (var i=0;i<Template.length;i++) {
                     GenPan.append(Template[i].cloneNode(true));
                 }
+
+                UpdateMenuOptions(SubPage);
             }
 
             function InitializeMainPage() {
                 GenerateMainPage();
                 InjectTemplateToGenericPanel('story_panel','Within Cycles');
+            }
+
+            function UpdateMenuOptions(NewPage) {
+
+                var PageClasses = [
+                    'story_panel','save_panel','display_panel',
+                    'audio_panel','info_panel','help_panel'
+                ];
+
+                var SettingHTML = [
+                    'Main Page','File Saves','Display Settings',
+                    'Audio Settings','Info Panel','Help Panel'
+                ];
+
+                var MenuOptions = document.getElementsByClassName('menu_options');
+
+                if (MenuOptions!=undefined) {
+                    MenuOptions=MenuOptions[0];
+                }
+
+                if (MenuOptions!=undefined) {
+                    MenuOptions=MenuOptions.children;
+                }
+
+                if (MenuOptions!=undefined) {
+                    MenuOptions=Array.from(MenuOptions);
+                }
+
+                if (Array.isArray(MenuOptions)) {
+                    var color = getComputedStyle(document.body).color;
+
+                    for (var i=0;i<MenuOptions.length;i++) {
+                        MenuOptions[i].style=[];
+                        MenuOptions[i].classList=['menu_panel_button'];
+                    }
+
+                    var Target = SettingHTML[PageClasses.indexOf(NewPage)];
+                    Target = RegExp(Target,'g');
+
+                    for (var i=0;i<MenuOptions.length;i++) {
+                        var Query = MenuOptions[i].innerHTML.match(Target);
+
+                        if ((Query!=null)&&(Query.length>0)) {
+                            MenuOptions[i].classList.add('selected_main_page');
+
+                            MenuOptions[i].style.setProperty('color',color);
+
+                            break;
+                        }
+                    }
+                }
             }
         </script>
 
@@ -232,6 +285,15 @@
             .menu_options {
                 flex-grow: 1;
                 flex-basis: auto;
+
+                padding-top: 35px;
+                padding-right: 10px;
+                padding-bottom: 20px;
+                padding-left: 10px;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
             }
 
             .page_title {
@@ -301,6 +363,18 @@
             .the_splash_button {
                 cursor: pointer;
             }
+
+            .menu_panel_button {
+                cursor: pointer;
+            }
+
+            .selected_main_page {
+                border-style: solid;
+                border-color: #cfddd4;
+                border-width: 3px;
+                border-radius: 6px;
+                padding: 5px;
+            }
         </style>
 
         <!-- I'm going to use a splash screen to try and mask any performance issues related to loading the website into memory, and possibly give the game a somewhat polished look. -->
@@ -322,7 +396,26 @@
         <!-- The main page is a 'super template' with a 'menu panel', 'top panel', and 'bottom section'. The title within the top panel is subject to change, along with the contents of the right_panel. Everything else will be static. -->
         <template id="main_page">
             <div class="menu_panel tall_window">
-                <div class="menu_options"></div>
+                <div class="menu_options">
+                    <div class="menu_panel_button selected_main_page" onclick="InjectTemplateToGenericPanel('story_panel','Within Cycles')">
+                        Main Page
+                    </div>
+                    <div class="menu_panel_button" onclick="InjectTemplateToGenericPanel('save_panel','Save States')">
+                        File Saves
+                    </div>
+                    <div class="menu_panel_button" onclick="InjectTemplateToGenericPanel('display_panel','Display Settings')">
+                        Display Settings
+                    </div>
+                    <div class="menu_panel_button" onclick="InjectTemplateToGenericPanel('audio_panel','Audio Settings')">
+                        Audio Settings
+                    </div>
+                    <div class="menu_panel_button" onclick="InjectTemplateToGenericPanel('info_panel','Information')">
+                        Info Panel
+                    </div>
+                    <div class="menu_panel_button" onclick="InjectTemplateToGenericPanel('help_panel','Help')">
+                        Help Panel
+                    </div>
+                </div>
                 <canvas class="menu_button bottom_button" onclick="ToggleMenu()" width="54px" height="54px">
                 </canvas>
             </div>
@@ -349,43 +442,48 @@
         <!-- If we don't detect any save information then the splash page will redirect to a notice page to give the player an idea of what they're in for. -->
         <template id="notice">
             <div class="notice_bin">
-            <div>
-                <h2>Notice</h2>
-                <p>
-                    It appears that this is your first time playing this game. If you are unfamiliar with what you are getting into, be aware of the following:
-                </p>
-                <ul>
-                    <li>
-                        This is an interactive horror story containing text descriptions that readers may find disturbing, shocking, reprehensible, or otherwise repulsive. Therefore, the following categories of individuals are advised against engaging with the material: victims of trauma or abuse, individuals under the age of 18, individuals coping with one or more mental conditions, and individuals in an unsafe environment. Viewer discretion is advised.
-                    </li>
-                    <li>
-                        In addition to the horrific nature of the text; the author has deliberately designed an interface that will be uncooperative or even antagonistic at times in order to terrify their audience.
-                    </li>
-                    <li>
-                        The nature of all of your interactions with this game will be through text; however, the functionality of this webpage is provided by somewhat modern markup and programming interfaces and an unwieldy amount of data that may behave unexpectedly on devices of a particular age or hardware capacity or software constraint.
-                    </li>
-                    <li>
-                        Though the every element of this project may indicate otherwise; no malice is intended by the author (who is grateful for your time and feedback, and understanding if you can spare neither).
-                    </li>
-                </ul>
-            </div>
-            <div class="notice_choice">
-                <span class="notice_button" onclick="InitializeMainPage()">Continue</span>
-                <span class="notice_spacer"></span>
-                <span class="notice_button notice_right" onclick="GenerateSplashPage()">Escape</span>
-            </div>
+                <div>
+                    <h2>Notice</h2>
+                    <p>
+                        It appears that this is your first time playing this game. If you are unfamiliar with what you are getting into, be aware of the following:
+                    </p>
+                    <ul>
+                        <li>
+                            This is an interactive horror story containing text descriptions that readers may find disturbing, shocking, reprehensible, or otherwise repulsive. Therefore, the following categories of individuals are advised against engaging with the material: victims of trauma or abuse, individuals under the age of 18, individuals coping with one or more mental conditions, and individuals in an unsafe environment. Viewer discretion is advised.
+                        </li>
+                        <li>
+                            This game is an interactive narrative, and the design of this interface borrows many elements from other instances. However, some features have been altered to better suit the genre of the contained story.
+                        </li>
+                        <li>
+                            The nature of all of your interactions with this game will be through text; however, the functionality of this webpage is provided by somewhat modern markup and programming interfaces and an unwieldy amount of data that may behave unexpectedly on devices of a particular age or hardware capacity or software constraint.
+                        </li>
+                        <li>
+                            Though the every element of this project may indicate otherwise; no malice is intended by the author (who is grateful for your time and feedback, and understanding if you can spare neither).
+                        </li>
+                    </ul>
+                </div>
+                <div class="notice_choice">
+                    <span class="notice_button" onclick="InitializeMainPage()">Continue</span>
+                    <span class="notice_spacer"></span>
+                    <span class="notice_button notice_right" onclick="GenerateSplashPage()">Escape</span>
+                </div>
             </div>
         </template>
 
         <!-- The save panel will consist of a list of existing saves along with options to do load or overwrite or delete each save. Above the list is an option to create a new save with any desired name, an option to delete all existing saves, an option to import a JSON file of save-state information, an option to export all existing save-states to an external JSON file, and an option to reset the unlisted auto-save generated by the active state of the game. -->
+        <template id="save_panel"></template>
 
         <!-- The display panel gives the player options to tweak the appearance of the game including: the color pallette, font style and size, text decorations that distinguish different kinds of communication with the player, along -->
+        <template id="display_panel"></template>
 
         <!-- The audio panel gives the player options to tweak how loud the music and sound effects are, along with the ability to filter what song tracks they want. The audio will rely on the audio API to generate sounds on demand. -->
+        <template id="audio_panel"></template>
 
         <!-- The info panel gives the player an in depth explanation of how the interface works and where they can find things, and gives a general rundown of how the story is structured. -->
+        <template id="info_panel"></template>
 
         <!-- The help panel gives the player a guide for how to report different kinds of errors or bugs experienced while running the game. It also offers to expidite the process by automating the collection of the information that would be most helpful. -->
+        <template id="help_panel"></template>
     </head>
 
     <body onload="GenerateSplashPage()">
