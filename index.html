@@ -1,717 +1,417 @@
 <!DOCTYPE html>
-
 <html>
     <head>
-        <title>
-            Within Cycles
-        </title>
-
-        <meta charset="UTF8">
-
+        <meta charset="UTF-8"> <!-- I've come across some older browsers that log an error if unspecified. -->
+        <title>Within Cycles</title>
         <style>
             :root {
-                --base-color: #a1a196;
-                --menu-color: #03040e;
-                --content-padding: 5px;
-            }
-
+                --default-background-color:#0f0201;
+                --base-color:#a1a196;
+                --menu-color:#03040e;
+                --content-padding:5px;
+            } /* This is where I put values that I want consistent. */
             body {
-                margin: 0;
-                height: 100vh;
-                width:  100vw;
-
-                display: flex;
-
-                color: var(--base-color);
-            }
-
+                /* The following 3 lines ensure that the body fills up the view window precisely, and that elements can huge the corners of the screen. */
+                margin:0;
+                height:100vh;
+                width:100vw;
+                display:flex;
+                color:var(--base-color);
+                overflow:hidden;
+            } /* The body is a place to shove templates in. */
             .game_container {
-                display: flex;
-                flex-direction: column;
-                flex-grow: 1;
-
-                background-color: #0f0201;
-            }
-
+                display:flex;
+                flex-direction:column;
+                flex-grow:1;
+                background-color:var(--default-background-color);
+                overflow:scroll;
+            } /* This contains the game banner, menu, and whatever game window is present. */
             .game_contents {
-                display: flex;
-                flex-direction: row;
-                flex-grow: 1;
-            }
-
+                display:flex;
+                flex-direction:row;
+                flex-grow:1;
+                overflow:hidden;
+            } /* This contains the game menu and whatever the current page is.*/
             .game_header {
-                display: flex;
-                flex-direction: row;
-
-                background-color: var(--menu-color);
-
-                padding: var(--content-padding);
-
-                border-bottom-style: solid;
-                border-bottom-color: var(--base-color);
-                border-bottom-width: 7px;
-            }
-
+                display:flex;
+                flex-direction:row;
+                background-color:var(--menu-color);
+                padding:var(--content-padding);
+                border-bottom-style:solid;
+                border-bottom-color:var(--base-color);
+                border-bottom-width:7px;
+            } /* This contains the title of the game and menu button */
             .banner_title {
-                font-family: cursive;
-                font-size: 51px;
-
-                flex-grow: 1;
-
-                text-align: center;
-            }
-
+                font-family:cursive;
+                font-size:51px;
+                flex-grow:1;
+                text-align:center;
+            } /* This contains the game title. */
             .game_menu {
-                display: flex;
-                flex-direction: column;
-
-                background-color: var(--menu-color);
-
-                padding: var(--content-padding);
-
-                border-right-style: solid;
-                border-right-color: var(--base-color);
-                border-right-width: 5px;
-            }
-
+                display:flex;
+                flex-direction:column;
+                background-color:var(--menu-color);
+                padding:var(--content-padding);
+                border-right-style:solid;
+                border-right-color:var(--base-color);
+                border-right-width:5px;
+                overflow-y:scroll;
+                flex-shrink:0;
+            } /* This contains the options to redirect to different game pages. */
             .menu_button_holster {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                align-content: center;
-
-                flex-grow: 1;
-            }
-
+                display:flex;
+                flex-direction:row;
+                align-items:center;
+                align-content:center;
+                flex-grow:1;
+            } /* Each menu button is contained in an expansive container to allow them to be spaced out in the menu. */
             .journal_button {
-                display: none;
-            }
-
+                display:none;
+            } /* By default the journal button is hidden since the player doesn't start the game with it. */
             .primary_panel {
-                display: flex;
-                flex-direction: column;
-
-                flex-grow: 1;
-            }
-
+                display:flex;
+                flex-direction:column;
+                flex-grow:1;
+            } /* This is where the different game pages get shoved in. */
             .narrator {
-                flex-grow: 1;
-
-                padding: var(--content-padding);
-            }
-
+                flex-grow:1;
+                padding:var(--content-padding);
+            } /* This is where the game text is shown. */
             .options {
-                flex-grow: 0;
-
-                background-color: #09130f;
-
-                padding: var(--content-padding);
-
-                border-top-style: solid;
-                border-top-color: var(--base-color);
-                border-top-width: 3px;
-            }
-
+                flex-shrink:0;
+                flex-grow:0;
+                background-color:#09130f;
+                padding:var(--content-padding);
+                border-top-style:solid;
+                border-top-color:var(--base-color);
+                border-top-width:3px;
+            } /* This is where the player makes their choices. */
             .splash_page {
-                display: flex;
-                flex-direction: column;
-                flex-grow: 1;
-
-                background-color: var(--menu-color);
-            }
-
+                display:flex;
+                flex-direction:column;
+                flex-grow:1;
+                background-color:var(--menu-color);
+            } /* This orients the components of the splash page vertically. */
             .splash_top {
-                display: flex;
-                align-items: end;
-                justify-content: center;
-                flex-grow: 1;
-            }
-
+                display:flex;
+                align-items:end;
+                justify-content:center;
+                flex-grow:1;
+            } /* This orients the game title on the splash screen. */
             .splash_bottom {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                flex-grow: 1;
-            }
-
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                flex-grow:1;
+            } /* This orients the buttons on the splash screen. */
             .splash_title {
-                font-size: 54pt;
-                font-family: cursive;
-            }
-
-            .splash_button {
-                font-family: 'Courier New', Courier, monospace;
-                text-decoration: underline;
-
-                cursor: pointer;
-            }
-
+                font-size:54pt;
+                font-family:cursive;
+            } /* This stylizes the game title. */
+            .game_button {
+                font-family:'Courier New', Courier, monospace;
+                text-decoration:underline;
+                cursor:pointer;
+            } /* This stylizes text that functions like a button. */
             .logo {
-                max-width: 51px;
-                max-height: 51px;
-            }
-
+                max-width:51px;
+                max-height:51px;
+            } /* This prevents the logo from deforming. */
             .logo:hover {
-                cursor: pointer;
-            }
-
+                cursor:pointer;
+            } /* This makes the logo an obvious button. */
             .info_text {
-                padding: 5px;
-                text-indent: 3em;
-            }
-
+                padding:5px;
+                text-indent:3em;
+            } /* This stylizes the notice text. */
             .notice_options {
-                display: flex;
-                flex-direction: row;
-                align-items: flex-start;
-                justify-content: space-evenly;
-                
-                flex-grow: 1;
-
-                padding-bottom: 5px;
-            }
-        </style>
-
+                display:flex;
+                flex-direction:row;
+                align-items:flex-start;
+                justify-content:space-evenly;
+                flex-grow:1;
+                padding-bottom:5px;
+            } /* This makes the notice buttons spread out and (hopefully) look nice. */
+        </style> <!-- There are currently 21 style headers. -->
         <script>
+            // Website Design Overview
             /*
-                The basic layout of the site is to nest things in div tags
-                until it looks right.
+                The intended behaviours of the site are as follows:
+                 - When the site is loaded the player is taken to the splash screen.
+                 - The player can either close the window or proceed to the game.
+                 - If this is the player's first time loading the site, they're taken to the notice screen.
+                 - After continuing from the splash screen or notice screen the player is directed to the game screen.
+                 - The game screen's default state is to show the 'the world' page (where the game takes place).
+                 - The game screen has a menu that let's the player redirect to other pages in case they want to learn more information, manage their save profiles, or interact with the game in another way.
+                 - The journal page gives the player an opportunity to mess around with their recorded progress and hopefully makes them feel more connected to their character's experiences.
+                 - The journal also gives the player a handy way to review what they've done.
+                 - The journal is also an entity that the player can interact with and have conversations with.
+                 - Initially I was going to make it possible to draw in the journal, but that would spike storage requirements too quickly.
+                 - The settings page gives the player the ability to change (in a very limited capacity) the look of the website, change the audio settings
 
-                The splash page gives the game a refined look and communicates the game's
-                minimalist appearance. The player is given the option to continue or leave
-                based on how they receive the title screen.
+                The splash page gives the game a refined look and communicates the game's minimalist appearance. The player is given the option to continue or leave based on how they receive the title screen. But most importantly it allows me to setup my shenannigans behind a loading screen (if necessary).
 
-                The notice page warns users who didn't bother checking the game's description
-                or were given the game file with no explanation as to the following:
-                    - What kind of game is this?
-                    - What kind of stuff will I find?
-                    - How sturdy is this game?
-                with the hope that they'll be able to make an informed decision about whether
-                or not they actually want to play this game.
+                The notice page warns users who didn't bother checking the game's description or were given the game file with no explanation as to the following:
+                 - What kind of game is this?
+                 - What kind of stuff will I find?
+                 - How sturdy is this game?
+                with the hope that they'll be able to make an informed decision about whether or not they actually want to play this game.
 
                 After the notice page is the main page which really functions as 7:
-                    - The World: the default page the player is brought to which is where
-                      they actually play the game and interact with the environment.
-                    - File Saves: the place where the player can manage save files
-                      including importing and exporting game files.
-                    - Settings: I don't know what to put here yet, but I plan on making a
-                      way for clever players to fundamentally change the world around them.
-                    - Information: the place where the player can read more about the game's
-                      internal design.
-                    - Help: the place where the player can learn more about how to play
-                      the game and what they can interact with, and the games mechanics.
-                    - Notice: the player can review the notice if they wish.
+                 - The World: the default page the player is brought to which is where they actually play the game and interact with the environment.
+                 - File Saves: the place where the player can manage save files including importing and exporting game files.
+                 - Journal: the place where the player can write down and draw stuff.
+                 - Settings: the place where the player either changes the present options or interacts with the game in a radical new way.
+                 - Information: the place where the player can read more about the game's internal design.
+                 - Help: the place where the player can learn more about how to play the game and what they can interact with, and the games mechanics.
+                 - Notice: the player can review the notice if they wish.
                 
                 The world page consists of 2 parts:
-                    - Narrator:
-                    - Options:
+                 - Narrator: this is where the story is described
+                 - Options: this is where the player picks what they want to do.
 
-                The file saves page consists of _ parts:
-                    - Create Save:
-                    - Import/Export Save:
-                    - Load Save:
+                The file saves page consists of 3 parts:
+                 - Create Save: this is where the player can name and create a new save.
+                 - Import/Export Save: this is where the player can import or export save profiles.
+                 - Load Save: this is where the player can select to load a previous save.
                 
-                The settings page IS TO BE DETERMINED
+                The settings page is a terminal emulator where the player can interface with an unknownn computer system. This system happens to be connected to the mainframe of the facility. The idea is that the player is actually controlling 2 different characters (whether or not they know it). The first character is unfortunately doomed no matter what they do, but it's possible that they can help the second character reach a secret ending that the player has no other way of getting. The terminal is meant to be something that gives replay value to the game because it gives the player a new way to interact with the environment.
 
-                The information page consists of _ parts:
+                The information is just a scrollable wall of text containing information about the game.
 
                 The help page consists of 2 parts:
-                    - Navigation:
-                    - 
+                    - Navigation: a banner style menu to select a topic to read about.
+                    - Details: text wall for explaining different components of the game.
 
                 The notice page is just a wall of text and some navigation buttons.
             */
-
-            /* The following lines are old code that needs to be refactored. */
-
-            // Variable checking if the player has journal
-            var HasJournal = false;
-
-            // Variable that holds base color.
-            var DrawingColor = "#a1a196";
-
-            var Journal = {posession:false,entries:[],relationship:[]};
-
-            // When the player wants to leave.
-            function Leave() {
-                window.close(); // We try to close the window.
-                // Some ways of opening the file prevent the close method from working.
-                // So we redirect to a blank page if it fails.
-                window.location.replace('about:blank');
-                console.clear();
-            }
-
-            function LoadTemplate(id) {
-                document.body.innerHTML = document.getElementById(id).innerHTML;
-
-                if(id=='game_page') {
-                    DrawLogo();
-
-                    LoadPage('the_world');
-                }
-                else if(id=="splash_screen") {
-                    CheckSaves();
-                }
-            }
-
-            function LoadGame() {
-                var check = window.localStorage.getItem("notice");
-                if((typeof(check)!="string")||(check!="true")) {
-                    LoadTemplate('notice');
-
-                    window.localStorage.setItem("notice",true);
-                }
-                else {
-                    LoadTemplate('game_page');
-                }
-            }
-
-            function ToggleMenu() {
-                var menu = document.getElementsByClassName('game_menu')[0];
-
-                menu.style.display = (menu.style.display=="none")?"flex":"none";
-
-                JournalCheck();
-            }
-
-            function JournalCheck() {
-                var display = (HasJournal)?"flex":"none";
-
-                document.getElementsByClassName('journal_button')[0].style="display:"+display;
-            }
-            
-            function LoadPage(id) {
-                var panel = document.body.getElementsByClassName('primary_panel');
-
-                if(panel.length>0) {
-                    panel[0].innerHTML=document.getElementById(id).innerHTML;
-                }
-            }
-
-            // Render Logo
-            function DrawLogo() {
-                var w=7,g=4,s=5*w+4*g;
-                var canvas = document.getElementsByClassName('logo')[0];
-
-                if(canvas!=null) {
-                    var ctx = canvas.getContext('2d');
-                    ctx.fillStyle = DrawingColor;
-                    ctx.fillRect(0,0,w,s);
-                    ctx.fillRect(w,0,s-w,w);
-                    ctx.fillRect(w,s-w,s-w,w);
-                    ctx.fillRect(s-w,w,w,3*w+4*g);
-                    ctx.fillRect(w+g,w+g,3*w+2*g,w);
-                    ctx.fillRect(w+g,2*w+2*g,3*w+2*g,w);
-                    ctx.fillRect(w+g,3*w+3*g,3*w+2*g,w);
-                }
-                
-            }
-        
+           
+            // Local Storage Overview
             /*
-                The intended structure of the localStorage data is as follows:
-                    The "notice" key stores a boolean indicating that the notice has been seen.
+                This website uses local storage because it is the class of memory that is as large and as persistent as it can be without prompting the user (which would and should scare them). Since the space is somewhat limited (about 610KB of storage maximum).
 
-                    The "saves" key stores an object tracking what save files exist.
+                This overview is a work in progress as I develop the game.
 
-                    The saves object is: {id,name,time} where
-                        id is an array full of save ID numbers.
-                        name is an array full of save names.
-                        time is an array of when the save was last loaded.
-                    
-                    Save file objects are saved to their indice.
-                    The only exception is the auto-save file.
-                    The structure of a save file is {Journal} where:
-                        Journal is an object tracking the state of the journal.
+                The localstorage is where all immediately accessible data is located. The assumption is that the player will only mess with it if they know what they're doing. The intended structure is as follows:
+                 - notice: a boolean tracking whether or not the player has seen the notice.
+                 - saves: an object tracking details about all contained save files.
+                 - auto: a designated location for saving the current save file.
+                 - time: a string tracking the last time the game autosaved.
+                 - [0 - 500]: these indices are reserved for save files (but the player will probably exceed the storage limit first).
                 
-                The structure of the journal object is {Posession,Entries,Relationship} where:
-                    Posession is a boolean tracking whether the player has the journal.
-                    Entries is an array of entry objects that represent journal pages.
-                    Relationship is an object tracking the nature of the player's
-                        relationship with the journal.
-                    
-                The structure of an entry object is {Date,Passage,Image} where
-                    Date indicates the in-game date the page is marked as.
-                    Passage is an array of Text objects.
-                    Image is an image that forms the background of the page.
+                The structure of the saves object is as follows:
+                 - id: an array of save ID numbers.
+                 - name: array of player assigned names for the save files.
+                 - time: array of dates tracking last time a save was loaded.
                 
-                The structure of a Text object is {Source,Writing} where
-                    Source indicates whether the player or the journal wrote something.
-                        The players handwriting is somewhat sloppy while
-                        the notebooks writing is more tidy.
-                    Writing is the text content of the passage.
+                The structure of a save file is as follows:
+                 - journal: an object tracking the player's progress.
+
+                The structure of a journal object is as follows:
+                 - possesion: tracks whether the player has the journal.
+                 - entries: a mixture of game and player made notes.
+                 - relationship: tracks the nature of the player's relationship with the journal.
+                
+                The structure of an entry object is a mixed array of player made strings and numbers referencing game text.
             */
 
-            // Function updates the current auto save profile.
-            function AutoSave() {
-                CheckSaves();
+            // The following are variables that help the game run, or help format the site.
+            var DrawingColor = "#a1a196"; // This is the color of all text and drawing.
+            var Journal = {posession:false,entries:[],relationship:[]}; // This tracks the journal's current state.
 
-                var newsave = {journal:Journal};
-
-                window.localStorage.setItem("auto",JSON.stringify(newsave));
-
-                var savedata = JSON.parse(window.localStorage.getItem("saves"));
-                var indice = savedata.id.indexOf("auto");
-                savedata.time[indice] = FormatDate(new Date(Date.now()));
-
-                window.localStorage.setItem("saves",JSON.stringify(savedata));
-            }
-
-            // The following function attempts to load a save file.
-            function LoadSave(saveid) {
-                if(ValidateSave(saveid)) {
-                    var savefile = JSON.parse(window.localStorage.getItem(saveid));
-                    Journal = savefile.journal;
-
-                    return(true);
+            // The following are impure functions that change the website or its data in some way. Calling them can have unintended effects.
+            function Leave(){window.close();window.location.replace("about:blank");console.clear()} // Triggers when the player wants to leave.
+            function LoadGame(){
+                var check = localStorage.getItem("notice");
+                if(check!="true") {
+                    SafeLoadTemplate('notice');
+                    localStorage.setItem("notice",true);
                 }
                 else {
-                    return(false);
+                    SafeLoadTemplate('game_page');
                 }
-            }
+            } // This handles the jump to either the game or the notice page from the splash screen.
+            function LoadPage(id){document.body.getElementsByClassName('primary_panel')[0].innerHTML=document.getElementById(id).innerHTML} // This loads a page within the main game page.
+            function DrawLogo() {
+                var canvas = document.getElementsByClassName('logo')[0];
+                var ctx = canvas.getContext('2d');
+                ctx.fillStyle = DrawingColor;
+                ctx.fillRect(0,0,7,51);
+                ctx.fillRect(7,0,44,7);
+                ctx.fillRect(7,44,44,7);
+                ctx.fillRect(44,7,7,37);
+                ctx.fillRect(11,11,29,7);
+                ctx.fillRect(11,22,29,7);
+                ctx.fillRect(11,33,29,7);
+            } // Renders the menu button.
 
-            // Function confirms that save is formatted properly.
-            function ValidateSave(saveid) {
-                var savefile = null;
-
-                try {
-                    savefile = JSON.parse(window.localStorage.getItem(saveid));
+            // The following functions are safe versions of impure functions. They can safely be called, and when the environment is as expected they will perform a specific action.
+            function SafeJournalCheck(){
+                var jb=document.getElementsByClassName('journal_button'),jp=Journal.posession;
+                if((jb.length>0)&&(typeof(jp)=="boolean")){jb[0].style="display:"+(jp?"flex":"none")}
+            } // This safely updates the journal button.
+            function SafeInitializeData(){
+                if(ValidSaveIndex()==0){
+                    localStorage.setItem("saves",JSON.stringify({id:[],name:[],time:[]}));
+                    SafeAutoSave();
                 }
-                catch(e) {
-                    return(false);
-                }
-
-                if((savefile==null)||(typeof(savefile)!="object")) {
-                    return(false);
-                }
-                else if((savefile.journal==null)||typeof(savefile.journal)!="object") {
-                    return(false);
-                }
-
-                return(ValidateJournal(savefile.journal));
-            }
-
-            // Function confirms that journal is formatted properly.
-            function ValidateJournal(journal) {
-                if((journal.posession==null)||typeof(journal.posession)!="boolean") {
-                    return(false);
-                }
-                else if((journal.entries==null)||!Array.isArray(journal.entries)) {
-                    return(false);
-                }
-                else if((journal.relationship==null)||!Array.isArray(journal.relationship)) {
-                    return(false);
-                }
-
-                if(ValidateEntries(journal.relationship)) {
-                    return(ValidateRelationship(journal.entries));
-                }
-                else {
-                    return(false);
-                }
-            }
-
-            // Function that validates journal entries.
-            function ValidateEntries(entries) {
-                // TODO: write function.
-                return(true);
-            }
-
-            // Function that validates relationship entries.
-            function ValidateRelationship(relationship) {
-                // TODO : write function.
-                return(true);
-            } 
-
-            // Ensures that the saves object is present and correctly formatted.
-            function CheckSaves() {
-                var saves = window.localStorage.getItem("saves");
-                var c1 = saves==null;
-
-                // We make sure that saves is correctly formatted JSON data.
-                try {
-                    saves = JSON.parse(saves);
-                }
-                catch(e) {
-                    c1 = 1;
-                    saves = {};
-                }
-
-                if(saves==null) {
-                    saves = {};
-                }
-
-                // We make shorthands for the objects we're looking at.
-                var ids = saves.id;
-                var names = saves.name;
-                var times = saves.time;
-
-                // We make sure that only the expected arrays are present.
-                c1 = c1||(!Array.isArray(ids))||(!Array.isArray(names));
-                c1 = c1||(!Array.isArray(times))||(Object.keys(saves).length!=3);
-
-                // We make sure that the arrays contain expected data.
-                // We also ensure that they contain the same amount of data.
-                if(c1==false) {
-                    c1 = !((ids.length==times.length)&&(ids.length==names.length));
-                    
-                    // The following ensures that only expected names are present.
-                    for(var i = 0;(i<names.length)&&(c1==false);i++) {
-                        if((typeof(names[i])!="string")||(names[i].length==0)) {
-                            c1 = true;
-                            break;
+                else if(ValidSaveIndex()==1){
+                    var saves=JSON.parse(localStorage.getItem("saves"));
+                    for(var i=0;i<saves.id.length;i++){
+                        if(!ValidateSaveIndice(saves.id,saves.name,saves.time)) {
+                            saves.id.splice(i,1);
+                            saves.name.splice(i,1);
+                            saves.time.splice(i,1);
+                            i--;
                         }
                     }
-
-                    // The following ensures that only expected save IDs are present.
-                    var indice = ids.indexOf("auto");
-                    c1 = c1||(indice==-1);
-
-                    for(var i = 0;(i<ids.length)&&(c1==false);i++) {
-                        if(i==indice) {
-                            continue;
-                        }
-
-                        var num = sids[i];
-
-                        if((Number.isSafeInteger(num)==false)||(num<0)) {
-                            c1 = true;
-                        }
+                    localStorage.setItem("saves",JSON.stringify(saves));
+                }
+                SafeAutoSave();
+            } // This ensures that the save index and auto save is up to date without overwriting good data, and also ensures that a good auto save file is present.
+            function SafeAutoSave(){
+                if(!ValidSaveProfile("auto")){
+                    localStorage.setItem("auto",JSON.stringify({journal:Journal}));
+                    localStorage.setItem("time",FormatDate(new Date()));
+                }
+            } // This updates the auto save if a valid save isn't present.
+            function SafeToggleMenu(){
+                if(document.getElementsByClassName('game_menu')[0]){
+                    var menu = document.getElementsByClassName('game_menu')[0];
+                    SafeJournalCheck();
+                    menu.style.display = (menu.style.display=="none")?"flex":"none";
+                }
+            } // This toggles the menu safely.
+            function SafeLoadTemplate(id){
+                if((typeof(id)=="string")&&(id.length>0)&&(document.getElementById(id)!=null)){
+                    document.body.innerHTML=document.getElementById(id).innerHTML;
+                    if(id=='game_page'){
+                        DrawLogo();
+                        LoadPage('the_world');
                     }
-
-                    // Program is good up to this point.
-
-                    // The following ensures that only proper times are present.
-                    for(var i = 0;(i<times.length)&&(c1==false);i++) {
-                        var pattern = /(\d{4})\/(\d{2})\/(\d{2}) @ (\d{2}):(\d{2}):(\d{2})/;
-                        var base = times[i].match(pattern);
-
-                        if(base.length<7) {
-                            c1 = true;
-                            break;
-                        }
-                        else {
-                            base = base.splice(1,6);
-                        }
-
-                        var calc = [...base];
-                        calc[1] = calc[1] - 1;
-
-                        calc = Date.UTC(calc[0],calc[1],calc[2],calc[3],calc[4],calc[5]);
-                        calc = new Date(calc);
-                        calc = (FormatDate(calc)).match(pattern);
-
-                        if(calc.length<7) {
-                            c1 = true;
-                            break;
-                        }
-                        else {
-                            calc = calc.splice(1,6);
-                        }
-
-                        for(var j=0;j<base.length;j++) {
-                            if(base[j]!=calc[j]) {
-                                c1 = true;
-                                break;
-                            }
-                        }
+                    else if(id=="splash_screen"){
+                        SafeInitializeData();
                     }
                 }
-
-                // If the saves object was malformed we scrub and reformat the local storage.
-                if(c1) {
-                    window.localStorage.clear();
-                    saves = {id:["auto"],name:["auto"],time:[FormatDate(new Date(Date.now()))]};
-                    window.localStorage.setItem("saves",JSON.stringify(saves));
+            } // This safely loads a template.
+            function SafeCreateNewSave(name){
+                SafeInitializeData();
+                if(ValidSaveIndex()){
+                    var GoodName=(typeof(name)=="string")?name:JSON.stringify(name);
+                    GoodName=(GoodName=="null")?"Unnamed Save":GoodName;
+                    GoodName=(GoodName==undefined)?"Unnamed Save":GoodName;
+                    GoodName=(GoodName.length==0)?"Unnamed Save":GoodName;
+                    var saves=JSON.parse(localStorage.getItem("saves"));
+                    var num=0;
+                    while(true){
+                        if(saves.id.indexOf(num)<0){break}
+                        num++;
+                    }
+                    if(Number.isSafeInteger(num)){
+                        saves.id.push(num);
+                        saves.name.push(GoodName);
+                        saves.time.push(FormatDate(new Date(Date.now())));
+                        localStorage.setItem(num,JSON.stringify({journal:Journal}));
+                        localStorage.setItem("saves",JSON.stringify(saves));
+                    }
                 }
-            }
+            } // This safely creates a new save.
+            function SafeLoadSave(id){if(ValidSaveProfile(id)){Journal=(JSON.parse(localStorage.getItem(saveid))).journal}} // This safely loads a save file.
 
-            // Creates a new save file.
-            function FirstAvailableSaveID() {
-                var id=0;
-
-                CheckSaves();
-
-                var listedID = JSON.parse(window.localStorage.getItem("saves")).id;
-                var recordedID = Object.keys(window.localStorage);
-                var saves = listedID.concat(recordedID);
-
-                while(1) {
-                    if(0>saves.id.indexOf(id)) {
+            // The following are pure functions. They do not mutate any data.
+            function ValidSaveIndex() {
+                var saves = localStorage.getItem("saves");
+                var check=(saves!=null)?0:2;
+                try{
+                    saves=JSON.parse(saves);
+                    saves=(saves==null)?{}:saves;
+                }catch(e){
+                    saves={};
+                }
+                if((Object.keys(saves).length!=3)||(saves.id==null)||(saves.time==null)||(saves.name==null)||(!Array.isArray(saves.id))||(!Array.isArray(saves.time))||(!Array.isArray(saves.name))||(saves.id.length!=saves.time.length)||(saves.id.length!=saves.name.length)){check=0}
+                for(var i=0;check&&(i<saves.id.length);i++) {
+                    if(!ValidateSaveIndice(saves.id,saves.name,saves.time)) {
+                        check=1;
                         break;
                     }
-
-                    id++;
                 }
-
-                return(id);
-            }
-            
-            // The following turns a date into a string.
-            function FormatDate(DateObject) {
-                var base = [
-                    DateObject.getFullYear(),
-                    DateObject.getMonth()+1,
-                    DateObject.getDate(),
-                    DateObject.getHours(),
-                    DateObject.getMinutes(),
-                    DateObject.getSeconds()
-                ];
-
-                base = base.map(function(a){return(a.toString())});
-                base = base.map(function(a){return(((a.length<2)?"0":"")+a)});
-
-                var date = base[0] + "/" + base[1] + "/" + base[2];
-                var time = base[3] + ":" + base[4] + ":" + base[5]; 
-
-                return(date + " @ " + time);
-            }
-
-            // We create a new save file.
-            function CreateNewSave(name) {
-                var GoodName = (typeof(name)=="string")?name:JSON.stringify(name);
-                GoodName = (GoodName=="null")?"Unnamed Save":GoodName;
-                GoodName = (GoodName==undefined)?"Unnamed Save":GoodName;
-                GoodName = (GoodName.length==0)?"Unnamed Save":GoodName;
-
-                var saves=JSON.parse(window.localStorage.getItem("saves"));
-
-                saves.id.push(FirstAvailableSaveID());
-                saves.name.push(GoodName);
-                saves.time.push(FormatDate(new Date(Date.now())));
-
-                window.localStorage.setItem("saves",JSON.stringify(saves));
-            }
-        </script>
-
-        <!-- Splash Page -->
+                return(check);
+            } // This validates the save index. It does not validate the saves that the index imply exist. 0 means that no valid index is present. 1 means that invalid entries exist, any other output means that the save index is valid.
+            function ValidateDate(date) {
+                var t=date.match(/(\d{4})\/(\d{2})\/(\d{2}) @ (\d{2}):(\d{2}):(\d{2})/).splice(1,6);
+                t[1]--;
+                t=FormatDate(new Date(...t));
+                return(date==t);
+            } // This ensures that a date is correctly formatted.
+            function ValidSaveProfile(id){
+                var profile=localStorage.getItem(id);
+                try{profile=JSON.parse(profile)}catch(e){profile={}}
+                return(ValidJournal(((profile==null)?{}:profile).journal));
+            } // This ensures that a given save profile is valid.
+            function ValidJournal(journal){
+                var check=(journal!=null)&&(typeof(journal)=="object")&&Array.isArray(journal.entries)&&(typeof(journal.posession)=="boolean")&&ValidateRelationship(journal.relationship);
+                for(var i=0;check&&(i<journal.entries.length);i++){
+                    check=ValidateEntry(journal.entries[i]);
+                }
+                return(check);
+            } // This function validates a journal object.
+            function ValidateEntry(entry){return((Number.isSafeInteger(Number(entry)))?ValidateEntryID(entry):((typeof(entry)=="string")&&(entry.length>0)));} // This confirms that a journal entry is valid.
+            function ValidateEntryID(id){return(true)} // TODO : Write function. Need to establish range of entry ID numbers.
+            function ValidateRelationship(relationship){return(true)} // TODO : write function. Need to establish structure of relationship object.
+            function FormatDate(DateObject){return(([DateObject.getFullYear(),"/",DateObject.getMonth()+1,"/",DateObject.getDate()," @ ",DateObject.getHours(),":",DateObject.getMinutes(),":",DateObject.getSeconds()].map(function(a){return(a.toString())})).map(function(a){return((((a.length<2)&&(Number.isSafeInteger(Number(a))))?"0":"")+a)}).join(""))} // This turns a date object into a string.
+            function ValidateSaveIndice(id,name,time){return((!Number.isSafeInteger(Number(id)))||(typeof(name)!="string")||(name=="")||!ValidateDate(time))} // This ensures that a triplet describing a save profile conforms to the standard of the save index.
+        </script> <!-- This contains the site's fucntionality. Plus all the major notes for myself. Currently 3 global variables and 20 functions. -->
         <template id="splash_screen">
             <div class="splash_page">
-                <div class="splash_top">
-                    <div class="splash_title">Within Cycles</div>
-                </div>
+                <div class="splash_top"><div class="splash_title">Within Cycles</div> </div>
                 <div class="splash_bottom">
-                    <div class="splash_button" onclick="LoadGame()">Start</div>
-                    <div class="splash_button" onclick="Leave()">Leave</div>
+                    <div class="game_button" onclick="LoadGame()">Start</div>
+                    <div class="game_button" onclick="Leave()">Leave</div>
                 </div>
             </div>
-        </template>
-
-        <!-- Game Page Container -->
+        </template> <!-- Splash Page -->
         <template id="game_page">
             <div class="game_container">
                 <div class="game_header">
-                    <canvas height="51px" width="51px" class="logo" onclick="ToggleMenu()">
-                    </canvas>
+                    <canvas height="51px" width="51px" class="logo" onclick="SafeToggleMenu()"></canvas>
                     <div class="banner_title">Within Cycles</div>
                 </div>
                 <div class="game_contents">
-                    <div class="game_menu" style="display: none;">
-                        <!-- Menu Options -->
-                        <div class="menu_button_holster">
-                            <div class="splash_button" onclick="LoadPage('the_world')">
-                                The World
-                            </div>
-                        </div>
-                        <div class="menu_button_holster journal_button">
-                            <div class="splash_button" onclick="LoadPage('the_journal')">
-                                Journal
-                            </div>
-                        </div>
-                        <div class="menu_button_holster">
-                            <div class="splash_button" onclick="LoadPage('save_data')">
-                                Files Saves
-                            </div>
-                        </div>
-                        <div class="menu_button_holster">
-                            <div class="splash_button" onclick="LoadPage('game_settings')">
-                                Settings
-                            </div>
-                        </div>
-                        <div class="menu_button_holster">
-                            <div class="splash_button" onclick="LoadPage('info')">
-                                Information
-                            </div>
-                        </div>
-                        <div class="menu_button_holster">
-                            <div class="splash_button" onclick="LoadPage('help')">
-                                Help
-                            </div>
-                        </div>
-                        <div class="menu_button_holster">
-                            <div class="splash_button" onclick="LoadPage('notice')">
-                                Notice
-                            </div>
-                        </div>
-
+                    <div class="game_menu" style="display:none;">
+                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('the_world')">The World</div></div>
+                        <div class="menu_button_holster journal_button"><div class="game_button" onclick="LoadPage('the_journal')">Journal</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('save_data')">Files Saves</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('game_settings')">Settings</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('info')">Information</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('help')">Help</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('notice')">Notice</div></div>
                     </div>
                     <div class="primary_panel"></div>
                 </div>
             </div>
-        </template>
-
-        <!-- Page where the game happens. -->
+        </template> <!-- Game Page Container -->
         <template id="the_world">
-            <div class="narrator">
-                <!-- Text that describes what is and has happeend goes here. -->
-            </div>
-            <div class="options">
-                <!-- Text that describes what the player can do goes here. -->
-            </div>
-        </template>
-
-        <!-- Journal Game Page -->
-        <template id="the_journal"></template>
-
-        <template id="save_data"></template>
-
-        <template id="game_settings"></template>
-
-        <template id="info"></template>
-
-        <template id="help"></template>
-
+            <div class="narrator"></div>
+            <div class="options"></div>
+        </template> <!-- Page where the game happens. -->
+        <template id="the_journal"></template> <!-- Journal Game Page -->
+        <template id="save_data"></template> <!-- Save Data Page -->
+        <template id="game_settings"></template> <!-- Settings Page -->
+        <template id="info"></template> <!-- Info Page -->
+        <template id="help"></template> <!-- Help Page -->
         <template id="notice">
             <div class="game_container">
-                <div class="info_text">
-                    This is a browser-based text game, which means that gameplay consists of reading.
-                    Furthermore, being made by a single person means
-                    that any number of issues may be present (please let me know if you find any).
-                </div>
-                <div class="info_text">
-                    Being a horror game merits the standard warning about
-                    &mdash; well &mdash; horrific descriptions. Furthermore, if you are mentally or 
-                    emotionally vulnerable I'm going to kindly ask that you only play this at the
-                    recommendation of a good friend. If you are a minor please ask a parent or legal
-                    guardian before playing this game.
-                </div>
-                <div class="info_text">
-                    While playing this game there will be a button to access the menu in the
-                    upper-left corner. This menu will allow you to redirect to a number of pages.
-                    These pages range from more information about the game if you need it, 
-                    to a page where you can manage save profiles (the game saves automatically
-                    at specific points, but this gives you more control).
-                    There is also a decorative settings page (no functionality yet).
-                </div>
-                <div class="info_text">
-                    I apologize if this game doesn't seem like your cup of tea or if you become
-                    frustrated or disappointed during the course of play. Regardless of how much
-                    time you invest in this game, I appreciate you stopping by and I am grateful
-                    for your patience. For those who wish to proceed &mdash; enjoy!
-                </div>
+                <div class="info_text">This is a browser-based text game, which means that gameplay consists of reading. To add to the difficulty, being made by a single person means that any number of issues may be present (please let me know if you find any).</div>
+                <div class="info_text">Being a horror game merits the standard warning about &mdash; well &mdash; horrific descriptions. Furthermore, if you are mentally or emotionally vulnerable I'm going to kindly ask that you only play this at the recommendation of a good friend. If you are a minor please ask a parent or legal guardian before playing this game.</div>
+                <div class="info_text">While playing this game there will be a button to access the menu in the upper-left corner. This menu will allow you to redirect to a number of pages. These pages range from more information about the game if you need it, to a page where you can manage save profiles (the game saves automatically at specific points, but this gives you more control). There is also a decorative settings page (no functionality yet).</div>
+                <div class="info_text">I apologize if this game doesn't seem like your cup of tea or if you become frustrated or disappointed during the course of play. Regardless of how much time you invest in this game, I appreciate you stopping by and I am grateful for your patience. For those who wish to proceed &mdash; enjoy!</div>
                 <div class="notice_options">
-                    <div class="splash_button" onclick="Leave()">
-                        Leave
-                    </div>
-                    <div class="splash_button" onclick="LoadTemplate('splash_screen')">
-                        Return Home
-                    </div>
-                    <div class="splash_button" onclick="LoadTemplate('game_page')">
-                        Continue
-                    </div>
+                    <div class="game_button" onclick="Leave()">Leave</div>
+                    <div class="game_button" onclick="SafeLoadTemplate('splash_screen')">Return Home</div>
+                    <div class="game_button" onclick="SafeLoadTemplate('game_page')">Continue</div>
                 </div>
             </div>
-        </template>
+        </template> <!-- Notice Page -->
     </head>
-    
-    <body onload="LoadTemplate('splash_screen')"></body>
+    <body onload="SafeLoadTemplate('splash_screen')"></body>
 </html>
