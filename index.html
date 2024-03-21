@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8"> <!-- I've come across some older browsers that log an error if unspecified. -->
         <title>Within Cycles</title>
@@ -43,7 +43,7 @@
             } /* This contains the title of the game and menu button */
             .banner_title {
                 font-family:cursive;
-                font-size:51px;
+                font-size: 36px;
                 flex-grow:1;
                 text-align:center;
             } /* This contains the game title. */
@@ -75,11 +75,12 @@
             } /* This is where the different game pages get shoved in. */
             .narrator {
                 flex-grow:1;
+                overflow: scroll;
                 padding:var(--content-padding);
             } /* This is where the game text is shown. */
             .options {
-                flex-shrink:0;
                 flex-grow:0;
+                overflow: scroll;
                 background-color:#09130f;
                 padding:var(--content-padding);
                 border-top-style:solid;
@@ -107,6 +108,7 @@
             .splash_title {
                 font-size:54pt;
                 font-family:cursive;
+                text-align: center;
             } /* This stylizes the game title. */
             .game_button {
                 font-family:'Courier New', Courier, monospace;
@@ -216,12 +218,15 @@
             */
 
             // The following are variables that help the game run, or help format the site.
-            var DrawingColor = "#a1a196"; // This is the color of all text and drawing.
+            const DrawingColor = "#a1a196"; // This is the color of all text and drawing.
             var Journal = {posession:false,entries:[],relationship:[]}; // This tracks the journal's current state.
 
             // The following are impure functions that change the website or its data in some way. Calling them can have unintended effects.
             function Leave(){window.close();window.location.replace("about:blank");console.clear()} // Triggers when the player wants to leave.
-            function LoadGame(){
+
+            // The following functions are safe versions of impure functions. They can safely be called, and when the environment is as expected they will perform a specific action.
+            // The following functions have no calls, but will be useful in future updates: SafeCreateNewSave, and SafeLoadSave.
+            function SafeLoadGame(){
                 var check = localStorage.getItem("notice");
                 if(check!="true") {
                     SafeLoadTemplate('notice');
@@ -231,21 +236,37 @@
                     SafeLoadTemplate('game_page');
                 }
             } // This handles the jump to either the game or the notice page from the splash screen.
-            function LoadPage(id){document.body.getElementsByClassName('primary_panel')[0].innerHTML=document.getElementById(id).innerHTML} // This loads a page within the main game page.
-            function DrawLogo() {
-                var canvas = document.getElementsByClassName('logo')[0];
-                var ctx = canvas.getContext('2d');
-                ctx.fillStyle = DrawingColor;
-                ctx.fillRect(0,0,7,51);
-                ctx.fillRect(7,0,44,7);
-                ctx.fillRect(7,44,44,7);
-                ctx.fillRect(44,7,7,37);
-                ctx.fillRect(11,11,29,7);
-                ctx.fillRect(11,22,29,7);
-                ctx.fillRect(11,33,29,7);
-            } // Renders the menu button.
+            function SafeLoadPage(id){
+                var temp=document.getElementById(id);
+                var target=document.getElementsByClassName('primary_panel');
+                if((temp!=null)&&(target.length>0)){
+                    target[0].innerHTML=temp.innerHTML;
 
-            // The following functions are safe versions of impure functions. They can safely be called, and when the environment is as expected they will perform a specific action.
+                    if(id="notice"){
+                        var thing=document.getElementsByClassName("notice_options");
+
+                        if(thing.length>0){
+                            thing[0].style="display:none";
+                        }
+                    }
+                }
+            }
+            function SafeDrawLogo(){
+                var logo=document.getElementsByClassName('logo');
+                if(logo.length>0){
+                    logo=logo[0].getContext('2d');
+                    if(logo!=null){
+                        logo.fillStyle=DrawingColor;
+                        logo.fillRect(0,0,7,51);
+                        logo.fillRect(7,0,44,7);
+                        logo.fillRect(7,44,44,7);
+                        logo.fillRect(44,7,7,37);
+                        logo.fillRect(11,11,29,7);
+                        logo.fillRect(11,22,29,7);
+                        logo.fillRect(11,33,29,7);
+                    }
+                }
+            }
             function SafeJournalCheck(){
                 var jb=document.getElementsByClassName('journal_button'),jp=Journal.posession;
                 if((jb.length>0)&&(typeof(jp)=="boolean")){jb[0].style="display:"+(jp?"flex":"none")}
@@ -286,8 +307,8 @@
                 if((typeof(id)=="string")&&(id.length>0)&&(document.getElementById(id)!=null)){
                     document.body.innerHTML=document.getElementById(id).innerHTML;
                     if(id=='game_page'){
-                        DrawLogo();
-                        LoadPage('the_world');
+                        SafeDrawLogo();
+                        SafeLoadPage('the_world');
                     }
                     else if(id=="splash_screen"){
                         SafeInitializeData();
@@ -365,7 +386,7 @@
             <div class="splash_page">
                 <div class="splash_top"><div class="splash_title">Within Cycles</div> </div>
                 <div class="splash_bottom">
-                    <div class="game_button" onclick="LoadGame()">Start</div>
+                    <div class="game_button" onclick="SafeLoadGame()">Start</div>
                     <div class="game_button" onclick="Leave()">Leave</div>
                 </div>
             </div>
@@ -378,13 +399,13 @@
                 </div>
                 <div class="game_contents">
                     <div class="game_menu" style="display:none;">
-                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('the_world')">The World</div></div>
-                        <div class="menu_button_holster journal_button"><div class="game_button" onclick="LoadPage('the_journal')">Journal</div></div>
-                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('save_data')">Files Saves</div></div>
-                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('game_settings')">Settings</div></div>
-                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('info')">Information</div></div>
-                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('help')">Help</div></div>
-                        <div class="menu_button_holster"><div class="game_button" onclick="LoadPage('notice')">Notice</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="SafeLoadPage('the_world')">The World</div></div>
+                        <div class="menu_button_holster journal_button"><div class="game_button" onclick="SafeLoadPage('the_journal')">Journal</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="SafeLoadPage('save_data')">Files Saves</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="SafeLoadPage('game_settings')">Settings</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="SafeLoadPage('info')">Information</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="SafeLoadPage('help')">Help</div></div>
+                        <div class="menu_button_holster"><div class="game_button" onclick="SafeLoadPage('notice')">Notice</div></div>
                     </div>
                     <div class="primary_panel"></div>
                 </div>
